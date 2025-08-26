@@ -17,6 +17,8 @@ struct OnboardingView: View {
     
     @State private var isAnimating: Bool = false
     
+    @State private var imageOffset: CGSize = .zero
+    
     var body: some View {
         ZStack {
             Color("ColorBlue")
@@ -52,13 +54,29 @@ It's not how much we give but how much love we put into giving.
                 
                 ZStack {
                     CircleGroupView(ShapeColor: .white, ShapeOpacity: 0.2)
+                        .offset(x: imageOffset.width * -1)
+                        .blur(radius: abs(imageOffset.width / 9))
+                        .animation(.easeOut(duration: 1), value: imageOffset)
                     
                     Image("character-1")
                         .resizable()
                         .scaledToFit()
                         .opacity(isAnimating ? 1 : 0)
                         .animation(.easeOut(duration: 1), value: isAnimating)
-                    
+                        .offset(x : imageOffset.width * 1.2, y: 0)
+                        .rotationEffect(.degrees(Double(imageOffset.width / 20)))
+                        .gesture(
+                            DragGesture()
+                                .onChanged { gesture in
+                                    if abs(imageOffset.width) <= 150 {
+                                        imageOffset = gesture.translation
+                                    }
+                                }
+                                .onEnded { _ in
+                                    imageOffset = .zero
+                                }
+                        )//END GESTURE
+                        .animation(.easeOut(duration: 1), value: imageOffset)
                 }
                 
                 Spacer()

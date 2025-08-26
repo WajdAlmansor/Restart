@@ -19,6 +19,10 @@ struct OnboardingView: View {
     
     @State private var imageOffset: CGSize = .zero
     
+    @State private var indicatorOpacity: Double = 1.0
+    
+    @State private var textTitle: String = "Share."
+    
     var body: some View {
         ZStack {
             Color("ColorBlue")
@@ -29,10 +33,14 @@ struct OnboardingView: View {
                 Spacer()
                 
                 VStack(spacing: 0) {
-                    Text("Share.")
+                    
+                    Text(textTitle)
                         .font(.system(size: 60))
                         .fontWeight(.heavy)
                         .foregroundColor(.white)
+                        .transition(.opacity)
+                        .id(textTitle)
+                    
                     Text("""
 It's not how much we give but how much love we put into giving.
 """)
@@ -70,14 +78,34 @@ It's not how much we give but how much love we put into giving.
                                 .onChanged { gesture in
                                     if abs(imageOffset.width) <= 150 {
                                         imageOffset = gesture.translation
+                                        
+                                        withAnimation(.linear(duration : 0.25)) {
+                                            indicatorOpacity = 0
+                                            textTitle = "Give."
+                                        }
                                     }
                                 }
                                 .onEnded { _ in
                                     imageOffset = .zero
+                                    
+                                    withAnimation(.linear(duration : 0.25)) {
+                                        indicatorOpacity = 1
+                                        textTitle = "Share."
+                                    }
                                 }
                         )//END GESTURE
                         .animation(.easeOut(duration: 1), value: imageOffset)
                 }
+                .overlay(
+                    Image(systemName: "arrow.left.and.right.circle")
+                        .font(.system(size: 44, weight: .ultraLight))
+                        .foregroundColor(.white)
+                        .offset(y: 20)
+                        .opacity(isAnimating ? 1 : 0)
+                        .animation(.easeOut(duration: 1).delay(1), value: isAnimating)
+                        .opacity(indicatorOpacity)
+                    , alignment: .bottom
+                )
                 
                 Spacer()
                 
